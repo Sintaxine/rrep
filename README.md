@@ -53,8 +53,8 @@ The formatter will output:
 
 ## Limitations
 
-- Only supports headers starting with `#` and bold wrapped in `**`.
-- No support yet for other Markdown syntax (italic, lists, links, etc.).
+- Only supports headers starting with `#`, bold wrapped in `**`, and italic wrapped in `**`.
+- No support yet for other Markdown syntax (lists, links, etc.).
 
 ## License
 
