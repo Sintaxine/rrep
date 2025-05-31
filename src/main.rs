@@ -58,7 +58,7 @@ fn refactored_parse_line(line: String) -> String {
         let trimmed = line.trim_start_matches("**").trim_end_matches("**").trim();
         return format!("{}{}{}", BOLDANSI, trimmed, RESETANSI);
     }
-    // refactoring word byt word
+    // refactoring word by word
 
     // we're gonna check if the word starts with "**" or "*", if it does we're gonna find the pair, if the pair doesn't exist then we are going to not format.
     else {
@@ -84,7 +84,6 @@ fn refactored_parse_line(line: String) -> String {
 
                     let joined = bold_block.join(" ");
                     result.push(format!("{}{}{}", BOLDANSI, joined, RESETANSI));
-
                     i = j + 1;
                     continue;
                 }
