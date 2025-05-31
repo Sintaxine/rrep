@@ -36,32 +36,42 @@ fn read_line_by_line(filename: String) -> Vec<String>{
 
 
 fn parse_line(line: String) -> String {
-  let red = "\x1b[31m"; // red ansi code;
-  let bold = "\x1b[1m";
-  let reset = "\x1b[0m";
-  let _linereset: String = format!("{}{}", line , "\x1b[0m");
-  if line.starts_with("#") {
-    let linereset = line.trim_start_matches("#").trim_start();
-    return format!("{}{}{}",red, linereset, reset);
+    let red = "\x1b[31m";   // red ANSI code
+    let bold = "\x1b[1m";   // bold ANSI code
+    let italic = "\x1b[3m"; // italic ANSI code
+    let reset = "\x1b[0m";
 
-  } else {
-    let words = read_word_by_word(line);
-    let mut result: Vec<String> = Vec::new();
-    for word in words {
-      if word.starts_with("**") && word.ends_with("**") {
-        let word = word.trim_start_matches("**").trim_start().trim_end_matches("**").trim_end();
-        result.push(format!("{}{}{}", bold, word, reset));
-      } else {
-        result.push(format!("{}", word)); 
-      }
+    if line.starts_with("#") {
+        let linereset = line.trim_start_matches("#").trim_start();
+        return format!("{}{}{}", red, linereset, reset);
+    } 
+
+    // whole line starts AND ends with ** ? italic it
+    else if line.starts_with("**") && line.ends_with("**") {
+        // trim the damn stars
+        let trimmed = line.trim_start_matches("**").trim_end_matches("**").trim();
+        return format!("{}{}{}", italic, trimmed, reset);
+    } 
+
+    // if it doesn't, parse word by word
+    else { // TODO: make this cleaner bruh
+        let words = read_word_by_word(line);
+        let mut result: Vec<String> = Vec::new();
+
+        for word in words {
+            if word.starts_with("**") && word.ends_with("**") {
+                let word_trimmed = word.trim_start_matches("**").trim_end_matches("**");
+                result.push(format!("{}{}{}", bold, word_trimmed, reset));
+            } else {
+                result.push(word);
+            }
+        }
+
+        return result.join(" ");
     }
-
-    let resultstring = result.join(" ");
-
-    resultstring 
-  }
-
 }
+
+
 
 
 fn read_word_by_word(line: String) -> Vec<String>{
