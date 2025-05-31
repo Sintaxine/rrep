@@ -1,5 +1,4 @@
 use std::fs;
-
 use std::io;
 
 fn main() {
@@ -39,25 +38,20 @@ fn parse_line(line: String) -> String {
         let linereset = line.trim_start_matches("#").trim_start();
         return format!("{}{}{}", red, linereset, reset);
     }
-    // whole line starts AND ends with ** ? make it all bold 
+    // whole line starts AND ends with ** ? make it all bold
     else if line.starts_with("**") && line.ends_with("**") {
         // trim the damn stars
         let trimmed = line.trim_start_matches("**").trim_end_matches("**").trim();
         return format!("{}{}{}", bold, trimmed, reset);
-    } 
-
-    // it doesn't? let's check if it's entirely italic then
-
-    else if line.starts_with("*") && line.ends_with("*") {
-      // trim
-      let trimmed: &str = line.trim_start_matches("*").trim_end_matches("*").trim();
-
-      return format!("{}{}{}", italic, trimmed, reset);
     }
+    // it doesn't? let's check if it's entirely italic then
+    else if line.starts_with("*") && line.ends_with("*") {
+        // trim
+        let trimmed: &str = line.trim_start_matches("*").trim_end_matches("*").trim();
 
-
+        return format!("{}{}{}", italic, trimmed, reset);
+    }
     // if it doesn't, parse word by word
-
     else {
         // TODO: make this cleaner bruh
         let words = read_word_by_word(line);
@@ -67,11 +61,10 @@ fn parse_line(line: String) -> String {
             if word.starts_with("**") && word.ends_with("**") {
                 let word_trimmed = word.trim_start_matches("**").trim_end_matches("**");
                 result.push(format!("{}{}{}", bold, word_trimmed, reset));
-            } else if word.starts_with("*") && word.ends_with("*"){
-                let word_trimmed = word.trim_start_matches("*").trim_end_matches("*"); 
+            } else if word.starts_with("*") && word.ends_with("*") {
+                let word_trimmed = word.trim_start_matches("*").trim_end_matches("*");
                 result.push(format!("{}{}{}", italic, word_trimmed, reset));
-              
-            }  else {
+            } else {
                 result.push(word);
             }
         }
