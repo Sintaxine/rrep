@@ -33,7 +33,6 @@ fn read_line_by_line(filename: String) -> Vec<String> {
     result
 }
 
-
 fn read_word_by_word(line: String) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
 
