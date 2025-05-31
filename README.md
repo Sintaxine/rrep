@@ -58,4 +58,4 @@ The formatter will output:
 
 ## License
 
-MIT License © mikuddev
+MIT License © mikuudev
