@@ -4,7 +4,7 @@ This is a lightweight Rust CLI tool that reads a text file and formats it in the
 
 - Lines starting with `#` are treated as headers and shown in **red**.
 - Words wrapped in `**` are rendered **bold** using terminal formatting.
-- Words wrapped in `**`` are rendered *italic*.
+- Words wrapped in `**` are rendered *italic*.
 
 ## Features
 
