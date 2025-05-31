@@ -33,50 +33,6 @@ fn read_line_by_line(filename: String) -> Vec<String> {
     result
 }
 
-fn parse_line(line: String) -> String {
-    let red = "\x1b[31m"; // red ANSI code
-    let bold = "\x1b[1m"; // bold ANSI code
-    let italic = "\x1b[3m"; // italic ANSI code
-    let reset = "\x1b[0m";
-
-    if line.starts_with("#") {
-        let linereset = line.trim_start_matches("#").trim_start();
-        return format!("{}{}{}", red, linereset, reset);
-    }
-    // whole line starts AND ends with ** ? make it all bold
-    else if line.starts_with("**") && line.ends_with("**") {
-        // trim the damn stars
-        let trimmed = line.trim_start_matches("**").trim_end_matches("**").trim();
-        return format!("{}{}{}", bold, trimmed, reset);
-    }
-    // it doesn't? let's check if it's entirely italic then
-    else if line.starts_with("*") && line.ends_with("*") {
-        // trim
-        let trimmed: &str = line.trim_start_matches("*").trim_end_matches("*").trim();
-
-        return format!("{}{}{}", italic, trimmed, reset);
-    }
-    // if it doesn't, parse word by word
-    else {
-        // TODO: make this cleaner bruh
-        let words = read_word_by_word(line);
-        let mut result: Vec<String> = Vec::new();
-
-        for word in words {
-            if word.starts_with("**") && word.ends_with("**") {
-                let word_trimmed = word.trim_start_matches("**").trim_end_matches("**");
-                result.push(format!("{}{}{}", bold, word_trimmed, reset));
-            } else if word.starts_with("*") && word.ends_with("*") {
-                let word_trimmed = word.trim_start_matches("*").trim_end_matches("*");
-                result.push(format!("{}{}{}", italic, word_trimmed, reset));
-            } else {
-                result.push(word);
-            }
-        }
-
-        return result.join(" ");
-    }
-}
 
 fn read_word_by_word(line: String) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
