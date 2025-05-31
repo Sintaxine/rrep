@@ -35,10 +35,10 @@ This is a lightweight Rust CLI tool that reads a text file and formats it in the
 
 Given a file `sample.md`:
 
-
+```md
 # This is a header
 This is a **bold** statement.
-
+```
 
 
 The formatter will output:
