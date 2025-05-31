@@ -1,123 +1,129 @@
 use std::fs;
 use std::io;
 
-const REDANSI: &str = "\x1b[31m"; // red ANSI code
-const BOLDANSI: &str = "\x1b[1m"; // bold ANSI code
-const ITALICANSI: &str = "\x1b[3m"; // italic ANSI code
-const RESETANSI: &str = "\x1b[0m"; // reset ANSI code
-const BLUEANSI: &str = "\x1b[34m"; // blue ANSI code
-const GREENANSI: &str = "\x1b[32m"; // green ANSI code
+// ANSI escape codes
+const RED_ANSI: &str = "\x1b[31m";
+const BOLD_ANSI: &str = "\x1b[1m";
+const ITALIC_ANSI: &str = "\x1b[3m";
+const RESET_ANSI: &str = "\x1b[0m";
+const BLUE_ANSI: &str = "\x1b[34m";
+const GREEN_ANSI: &str = "\x1b[32m";
+const LINK_ANSI: &str = "\x1b[34;4m"; // Blue with underline
 
-fn main() {
-    let mut buffer = String::new();
+fn main() -> io::Result<()> {
     println!("Please enter the name of the file to open below.");
+    
+    let mut filename = String::new();
+    io::stdin().read_line(&mut filename)?;
+    let filename = filename.trim();
 
-    io::stdin().read_line(&mut buffer).expect("Error occured!");
-
-    let buffer = String::from(buffer.trim());
-
-    let lines = read_line_by_line(buffer);
+    let lines = read_lines(filename)?;
 
     for line in lines {
-        let formattedline = parse_line(line);
-
-        println!("{}", formattedline);
+        let formatted_line = parse_line(line);
+        println!("{}", formatted_line);
     }
+
+    Ok(())
 }
 
-fn read_line_by_line(filename: String) -> Vec<String> {
-    let mut result = Vec::new();
-
-    for line in fs::read_to_string(filename).unwrap().lines() {
-        result.push(line.to_string())
-    }
-
-    result
-}
-
-fn read_word_by_word(line: String) -> Vec<String> {
-    let mut result: Vec<String> = Vec::new();
-
-    for word in line.split_whitespace() {
-        result.push(word.to_string())
-    }
-
-    result
+fn read_lines(filename: &str) -> io::Result<Vec<String>> {
+    fs::read_to_string(filename).map(|content| {
+        content.lines().map(String::from).collect()
+    })
 }
 
 fn parse_line(line: String) -> String {
-    // Refactoring the parse_line function to also format inside of line bold and italic multiple words.
+    if line.starts_with("###") {
+        format!("{}{}{}", GREEN_ANSI, line.trim_start_matches("###").trim_start(), RESET_ANSI)
+    } else if line.starts_with("##") {
+        format!("{}{}{}", BLUE_ANSI, line.trim_start_matches("##").trim_start(), RESET_ANSI)
+    } else if line.starts_with("#") {
+        format!("{}{}{}", RED_ANSI, line.trim_start_matches("#").trim_start(), RESET_ANSI)
+    } else {
+        parse_formatted_text(&line)
+    }
+}
 
-    match line {
-        line if line.starts_with("###") => {
-            let trimmed: &str = line.trim_start_matches("###").trim_start();
-            return format!("{}{}{}", GREENANSI, trimmed, RESETANSI);
-        },
-        
-        line if line.starts_with("##") => {
-            let trimmed: &str = line.trim_start_matches("##").trim_start();
-            return format!("{}{}{}", BLUEANSI, trimmed, RESETANSI);
-        },
-
-        line if line.starts_with("#") => {
-            let trimmed: &str = line.trim_start_matches("#").trim_start();
-            return format!("{}{}{}", REDANSI, trimmed, RESETANSI);
-        }
-        _ => {
-            let words: Vec<String> = read_word_by_word(line);
-            let mut result: Vec<String> = Vec::new();
-            let mut i = 0;
-
-            while i < words.len() {
-                if words[i].starts_with("**") {
-                    let mut j = i;
-
-                    while j < words.len() - 1 && !words[j].ends_with("**") {
-                        j += 1;
+fn parse_formatted_text(line: &str) -> String {
+    let mut result = String::new();
+    let mut chars = line.chars().peekable();
+    
+    while let Some(c) = chars.next() {
+        match c {
+            '[' => {
+                // Start of a potential link
+                let mut link_text = String::new();
+                while let Some(&next) = chars.peek() {
+                    if next == ']' {
+                        chars.next(); // consume the ']'
+                        break;
                     }
-
-                    if j < words.len() && words[j].ends_with("**") {
-                        // Collect the bold block
-                        let mut bold_block = Vec::new();
-                        for k in i..=j {
-                            let word = words[k].trim_start_matches("**").trim_end_matches("**");
-                            bold_block.push(word.to_string());
-                        }
-
-                        let joined = bold_block.join(" ");
-                        result.push(format!("{}{}{}", BOLDANSI, joined, RESETANSI));
-                        i = j + 1;
-                        continue;
-                    }
+                    link_text.push(chars.next().unwrap());
                 }
-                // bold case
-                else if words[i].starts_with("*") {
-                    let mut j = i;
-
-                    while j < words.len() - 1 && !words[j].ends_with("*") {
-                        j += 1;
-                    }
-
-                    if j < words.len() && words[j].ends_with("*") {
-                        // Collect the bold block
-                        let mut bold_block = Vec::new();
-                        for k in i..=j {
-                            let word = words[k].trim_start_matches("*").trim_end_matches("*");
-                            bold_block.push(word.to_string());
+                
+                // Check if this is followed by '(url)'
+                if chars.next() == Some('(') {
+                    let mut url = String::new();
+                    while let Some(&next) = chars.peek() {
+                        if next == ')' {
+                            chars.next(); // consume the ')'
+                            break;
                         }
-
-                        let joined = bold_block.join(" ");
-                        result.push(format!("{}{}{}", ITALICANSI, joined, RESETANSI));
-
-                        i = j + 1;
-                        continue;
+                        url.push(chars.next().unwrap());
                     }
-                } // italic case
-
-                result.push(words[i].clone());
-                i += 1;
+                    
+                    // Format as clickable link (OSC 8 escape sequence)
+                    result.push_str(&format!(
+                        "\x1b]8;;{}\x1b\\{}{}{}\x1b]8;;\x1b\\",
+                        url, LINK_ANSI, link_text, RESET_ANSI
+                    ));
+                } else {
+                    // Not a link, just regular text
+                    result.push('[');
+                    result.push_str(&link_text);
+                    result.push(']');
+                }
             }
-            return result.join(" ");
+            '*' => {
+                // Handle bold/italic
+                let next_char = chars.peek();
+                if next_char == Some(&'*') {
+                    chars.next(); // consume second '*'
+                    let mut bold_text = String::new();
+                    while let Some(&next) = chars.peek() {
+                        if next == '*' {
+                            chars.next(); // consume '*'
+                            if chars.peek() == Some(&'*') {
+                                chars.next(); // consume second '*'
+                                break;
+                            } else {
+                                bold_text.push('*');
+                            }
+                        } else {
+                            bold_text.push(chars.next().unwrap());
+                        }
+                    }
+                    result.push_str(&format!("{}{}{}", BOLD_ANSI, bold_text, RESET_ANSI));
+                } else {
+                    // Italic
+                    let mut italic_text = String::new();
+                    while let Some(&next) = chars.peek() {
+                        if next == '*' {
+                            chars.next(); // consume '*'
+                            break;
+                        } else {
+                            italic_text.push(chars.next().unwrap());
+                        }
+                    }
+                    result.push_str(&format!("{}{}{}", ITALIC_ANSI, italic_text, RESET_ANSI));
+                }
+            }
+            _ => {
+                result.push(c);
+            }
         }
     }
+    
+    result
 }
