@@ -16,7 +16,7 @@ Here's a link to [Rust's official website](https://www.rust-lang.org).
 Malformed links should appear as plain text: [just brackets] and [missing paren https://example.com.
 
 You can mix formats like **[bold link](https://example.com)** or *italic link [example](https://example.com)*.
-
+![image](cat.jpg)
 Edge cases:
 - Literal stars: 2 * 2 = 4
 - Literal brackets: array[0]
