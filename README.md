@@ -5,7 +5,7 @@ This is a lightweight Rust CLI tool that reads a text file and formats it in the
 - Lines starting with `#`, `##`, and `###` are treated as headers and shown in **red**, **blue**, and **green** respectively.
 - Words wrapped in `**` are rendered **bold** using terminal formatting.
 - Words wrapped in `**` are rendered *italic*.
-
+- Links work ``[Link text here](link)``.
 ## Features
 
 - Reads a file line-by-line from user input.
@@ -54,8 +54,8 @@ The formatter will output:
 
 ## Limitations
 
-- Only supports headers starting with `#`, bold wrapped in `**`, and italic wrapped in `**`.
-- No support yet for other Markdown syntax (lists, links, etc.).
+- Only supports headers starting with `#`, `##`, and `###` bold wrapped in `**`, italic wrapped in `*` and links.
+- No support yet for other Markdown syntax (lists, etc.).
 
 ## License
 
