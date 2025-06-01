@@ -4,5 +4,6 @@ version = "0.2.0"
 edition = "2024"
 
 [dependencies]
-viuer = "0.6"
-image = "0.24" # or whatever version, required by viuer
+image = "0.24"
+base64 = "0.21"
+crossterm = "0.27"

@@ -1,6 +1,8 @@
 use std::fs;
 use std::io;
-use viuer::{print_from_file};
+use std::io::Write;
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use crossterm::terminal::size;
 
 // ANSI escape codes
 const RED_ANSI: &str = "\x1b[31m";
@@ -25,6 +27,7 @@ fn main() -> io::Result<()> {
         println!("{}", formatted_line);
     }
 
+    println!("{:?}", size());
     Ok(())
 }
 
@@ -81,19 +84,43 @@ fn parse_formatted_text(line: &str) -> String {
                         let mut url = String::new();
                         while let Some(&next) = chars.peek() {
                             if next == ')' {
-                                chars.next(); // consume ')'
+                                chars.next(); // consume ')' // "no consume my dick instead" - FKF
                                 break;
                             }
                             url.push(chars.next().unwrap());
                         }
 
                         // 🚨 RENDER IMAGE HERE
-                        let config = viuer::Config {
-                            width: Some(40),  // in terminal *cells*, not pixels
-                            height: Some(20), // adjust to whatever doesn't wreck your layout
-                            ..Default::default()
-                        };
-                        let _ = print_from_file(&url, &config);
+                        if let Ok(img) = image::open(&url) {
+                            // Get terminal size
+                            let (width, height) = size().unwrap();
+                            
+                            // Calculate image size (usein n% of terminal width and heigh. for now 40 is what I'm going wth)
+                            let img_width = (width as u32 ) / 2;  // divide by 2 because terminal cells are around that aspect ration. unless it's some fancy shit
+                            //or else it's too widwe
+                            let img_height = (height as u32 );
+                            println!("{}{}", img_width, img_height);
+
+                            //IDK the scaling bug and I give up kys
+                            
+                            // Resize image to fit terminal
+                            let resized = img.resize_exact(img_width, img_height, image::imageops::FilterType::Lanczos3); //the lancoz shit was from the internet IDK what this shit does
+                            
+                            // Convert to RGB (not RGBA)
+                            let rgb = resized.to_rgb8();
+                            
+                            // Encode as base64
+                            let b64 = BASE64.encode(rgb.as_raw());
+                            
+                            // Construct and print Kitty escape sequence
+                            // Using f=24 for 24-bit RGB format /// IIRC you can compress the size here 
+                            print!("\x1b_Ga=T,f=24,i=1,s={},v={};{}\x1b\\",
+                                rgb.width(),
+                                rgb.height(),
+                                b64
+                            );
+                            io::stdout().flush().unwrap();
+                        }
 
                         // Fallback text if image fails
                         result.push_str(&format!(
