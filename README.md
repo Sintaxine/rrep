@@ -16,7 +16,7 @@ This is a lightweight Rust CLI tool that reads a text file and formats it in the
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/mikudev/rrep.git
+    git clone https://github.com/mikudev/rrep
     cd markdown-formatter
     ```
 
